@@ -1,4 +1,9 @@
-# Repository Pattern
+---
+title: Repository Pattern
+date: 20201015
+author: Lyz
+---
+
 
 [![Actions Status](https://github.com/lyz-code/repository-pattern/workflows/Python%20package/badge.svg)](https://github.com/lyz-code/repository-pattern/actions)
 
@@ -14,18 +19,18 @@ in the storage. *repository-pattern* aims to mitigate this inconvenient by:
 * Supplying test classes and fixtures so extending the provided repositories is
     easy.
 
-## Help
+# Help
 
 See [documentation](https://github.io/lyz-code/repository-pattern) for more
 details.
 
-## Installing
+# Installing
 
 ```bash
 pip install repository-pattern
 ```
 
-## A Simple Example
+# A Simple Example
 
 ```python
 from repository_pattern import Entity, FakeRepository
@@ -56,12 +61,33 @@ repo.commit()
 assert len(repo.all(Author)) == 0
 ```
 
-## Contributing
+# Usage
+
+The different repositories share the following operations:
+
+`add`
+: Add an `Entity` object to the repository.
+
+`delete`
+: Remove an `Entity` object form the repository.
+
+`get`
+: Obtain an `Entity` from the repository by it's ID.
+
+`commit`
+: Persist the changes into the repository.
+
+`all`
+: Obtain all the entities of type `Entity` from the repository.
+
+`search`
+: Obtain the entities whose attributes match a condition.
+
+!!! note ""
+    Changes in the repository aren't persisted until you run `repo.commit()`.
+
+# Contributing
 
 For guidance on setting up a development environment and how to make
 a contribution to *repository-pattern*, see [Contributing to
-repository-pattern](https://lyz-code.github.io/blue-book/architecture/repository_pattern/contributing).
-
-## License
-
-GPLv3
+repository-pattern](contributing.md).

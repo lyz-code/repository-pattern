@@ -15,3 +15,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with pydo.  If not, see <http://www.gnu.org/licenses/>.
+
+from typing import TypeVar
+
+from .adapters import AbstractRepository  # noqa
+from .adapters.fake import FakeRepository
+from .exceptions import EntityNotFoundError  # noqa
+from .model import Entity  # noqa
+
+# Need to put it twice because TypeVar doesn't support only one argument
+Repository = TypeVar("Repository", FakeRepository, FakeRepository)

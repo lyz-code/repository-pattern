@@ -1,14 +1,18 @@
 from glob import glob
 from os.path import basename, splitext
+from typing import Dict
 
 from setuptools import find_packages, setup
 
-__version__ = "0.1.0"
+# Avoid loading the package before requirements are installed:
+version: Dict = {}
+with open("src/repository_pattern/version.py") as fp:
+    exec(fp.read(), version)
 
 setup(
-    name="cookiecutter-python-project",
-    version=__version__,  # noqa: F821
-    description="A Cookiecutter template for creating Python projects",
+    name="repository-pattern",
+    version=version["__version__"],
+    description="Library to ease the implementation of the repository pattern.",
     author="Lyz",
     author_email="lyz@riseup.net",
     license="GNU General Public License v3",
@@ -18,20 +22,26 @@ setup(
     packages=find_packages("src"),
     package_dir={"": "src"},
     py_modules=[splitext(basename(path))[0] for path in glob("src/*.py")],
-    python_requires='>=3.6',
+    python_requires=">=3.6",
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
-        'Intended Audience :: Developers',
+        "Development Status :: 2 - Pre-Alpha",
+        "Intended Audience :: Developers",
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
-        'Operating System :: Unix',
-        'Operating System :: POSIX',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Topic :: Utilities',
-        'Natural Language :: English',
+        "Operating System :: Unix",
+        "Operating System :: POSIX",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Topic :: Utilities",
+        "Natural Language :: English",
     ],
-    install_requires=['pypika', 'pymysql', 'yoyo-migrations', ],
+    install_requires=[
+        "deepdiff[murmur]",
+        "pydantic",
+        "pypika",
+        "pymysql",
+        "yoyo-migrations",
+    ],
 )

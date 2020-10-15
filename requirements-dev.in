@@ -1,8 +1,11 @@
--c requirements.txt
+-r requirements.txt
 
 # Testing
 pytest
 pytest-cov
+pytest-cases
+pytest-pythonpath
+factory_boy
 
 # Linting
 yamllint
