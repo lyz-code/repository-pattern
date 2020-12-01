@@ -1,8 +1,9 @@
-site_name: Repository Pattern documentation
+site_name: Repository Pattern
 site_author: Lyz
 site_url: https://lyz-code.github.io/repository-pattern
 nav:
-  - Introduction: 'index.md'
+  - Overview: index.md
+  - Contributing: contributing.md
 
 plugins:
   - search
@@ -14,6 +15,8 @@ plugins:
 
 markdown_extensions:
   - admonition
+  - markdown_include.include:
+      base_path: docs
   - meta
   - toc:
       permalink: true
@@ -37,8 +40,10 @@ markdown_extensions:
 
 theme:
   name: material
-  custom_dir: 'theme'
+  custom_dir: docs/theme
   # logo: 'images/logo.bmp'
+  features:
+    - navigation.instant
   palette:
     primary: 'blue grey'
     accent: 'light blue'

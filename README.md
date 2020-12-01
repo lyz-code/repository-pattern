@@ -16,7 +16,7 @@ in the storage. *repository-pattern* aims to mitigate this inconvenient by:
 
 ## Help
 
-See [documentation](https://github.io/lyz-code/repository-pattern) for more
+See [documentation](https://lyz-code.github.io/repository-pattern) for more
 details.
 
 ## Installing
@@ -25,42 +25,11 @@ details.
 pip install repository-pattern
 ```
 
-## A Simple Example
-
-```python
-from repository_pattern import Entity, FakeRepository
-
-repo = FakeRepository()
-
-
-class Author(Entity):
-    id: int
-    first_name: str
-    last_name: str
-    country: str
-
-
-author = Author(id=0, first_name="Brandon", last_name="Sanderson", country="US")
-
-# Add entities
-repo.add(author)
-repo.commit()
-
-# Search entities
-brandon = repo.search(Author, {"first_name": "Brandon"})[0]
-assert brandon == author
-
-# Delete entities
-repo.delete(brandon)
-repo.commit()
-assert len(repo.all(Author)) == 0
-```
-
 ## Contributing
 
 For guidance on setting up a development environment and how to make
 a contribution to *repository-pattern*, see [Contributing to
-repository-pattern](https://lyz-code.github.io/blue-book/architecture/repository_pattern/contributing).
+repository-pattern](https://lyz-code.github.io/repository_pattern/contributing).
 
 ## License
 

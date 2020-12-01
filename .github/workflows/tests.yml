@@ -1,7 +1,14 @@
 ---
 name: Tests
 
-on: [push]  # yamllint disable-line rule:truthy
+on: # yamllint disable-line rule:truthy
+  push:
+    branches:
+      - '*'         # matches every branch that doesn't contain a '/'
+      - '*/*'       # matches every branch containing a single '/'
+      - '**'        # matches every branch
+      - '!gh-pages' # excludes gh-pages
+  pull_request:
 
 jobs:
   Black:
@@ -74,4 +81,26 @@ jobs:
           pip install -r requirements-dev.txt
       - name: Test with pytest
         run: |
-          python -m pytest --cov-report term-missing --cov src tests
+      - name: Test with pytest
+        run: |
+          pytest --cov src tests
+      - name: Upload Coverage
+        run: |
+          pip install coveralls
+          coveralls
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_FLAG_NAME: ${{ matrix.python-version }}
+          COVERALLS_PARALLEL: true
+  Coveralls_Finish:
+    name: Finish Coveralls
+    needs: Pytest
+    runs-on: ubuntu-latest
+    container: python:3-slim
+    steps:
+      - name: Finished
+        run: |
+          pip3 install --upgrade coveralls
+          coveralls --finish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

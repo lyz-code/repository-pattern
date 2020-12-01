@@ -14,7 +14,7 @@ python -c "import repository_pattern.version; print(repository_pattern.version.v
 ```
 
 Please try to always include the above unless you're unable to install
-*repository-repport* or **know** it's not relevant to your question or feature
+*repository-pattern* or **know** it's not relevant to your question or feature
 request.
 
 ## Pull Requests
@@ -38,14 +38,14 @@ You'll need to have **python 3.6**, **3.7**, or **3.8**, **virtualenv**, **git**
 ```bash
 # 1. clone your fork and cd into the repo directory
 git clone git@github.com:<your username>/repository-pattern.git
-cd pydantic
+cd repository-pattern
 
 # 2. Set up a virtualenv for running tests
 virtualenv -p `which python3.7` env
 source env/bin/activate
 # (or however you prefer to setup a python environment, 3.6 will work too)
 
-# 3. Install pydantic, dependencies and test dependencies
+# 3. Install repository-pattern, dependencies and configure the pre-commits
 make install
 
 # 4. Checkout a new branch and make your changes
@@ -59,13 +59,13 @@ make format
 
 # 6. Run tests and linting
 make
-# there are a few sub-commands in Makefile like `test`, `testcov` and `lint`
+# there are a few sub-commands in Makefile like `test-code` or `test-examples`
 # which you might want to use, but generally just `make` should be all you need
 
 # 7. Build documentation
 make docs
 # if you have changed the documentation make sure it builds successfully
-# you can also use `make docs-serve` to serve the documentation at localhost:8000
+# once built it will serve the documentation at localhost:8000
 
 # ... commit, push, and create your pull request
 ```

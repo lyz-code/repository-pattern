@@ -8,17 +8,6 @@ repos:
       - id: check-docstring-first
       - id: check-merge-conflict
       - id: end-of-file-fixer
-  - repo: https://github.com/jazzband/pip-tools
-    rev: 5.0.0
-    hooks:
-      - name: Build requirements.txt
-        id: pip-compile
-      - name: Build requirements-dev.txt
-        id: pip-compile
-        args: ['--allow-unsafe', 'requirements-dev.in']
-      - name: Build mkdocs requirements.txt
-        id: pip-compile
-        args: ['docs/requirements.txt']
   - repo: https://github.com/ambv/black
     rev: stable
     hooks:

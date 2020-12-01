@@ -1,64 +1,97 @@
 .DEFAULT_GOAL := all
-isort = isort src tests
-black = black --target-version py37 src tests
+isort = isort src docs/examples tests
+black = black --target-version py37 src docs/examples tests
 
 .PHONY: install
 install:
 	python -m pip install -U setuptools pip
-	pip install -U -r requirements.txt
+	pip install -r requirements-dev.txt
 	pip install -e .
+	pre-commit install
+
+.PHONY: update
+update:
+	@echo "-------------------------"
+	@echo "- Updating dependencies -"
+	@echo "-------------------------"
+
+	pip-compile -U --allow-unsafe
+	pip-compile -U --allow-unsafe requirements-dev.in --output-file requirements-dev.txt
+	pip-compile -U --allow-unsafe docs/requirements.in --output-file docs/requirements.txt
+	pip install -r requirements-dev.txt
+
+	@echo ""
 
 .PHONY: format
 format:
+	@echo "----------------------"
+	@echo "- Formating the code -"
+	@echo "----------------------"
+
 	$(isort)
 	$(black)
 
+	@echo ""
+
 .PHONY: lint
 lint:
+	@echo "--------------------"
+	@echo "- Testing the lint -"
+	@echo "--------------------"
+
 	flake8 src/ tests/
 	$(isort) --check-only --df
 	$(black) --check --diff
 
+	@echo ""
+
 .PHONY: mypy
 mypy:
+	@echo "----------------"
+	@echo "- Testing mypy -"
+	@echo "----------------"
+
 	mypy src
 
-.PHONY: test
-test:
-	pytest --cov=src
+	@echo ""
+
+.PHONY: test-code
+test: test-code test-examples
+
+.PHONY: test-code
+test-code:
+	@echo "----------------"
+	@echo "- Testing code -"
+	@echo "----------------"
+
+	python -m pytest --cov-report term-missing --cov src tests
+
+	@echo ""
+
+.PHONY: test-examples
+test-examples:
+	@echo "--------------------"
+	@echo "- Testing examples -"
+	@echo "--------------------"
+
+	@find docs/examples -type f -name '*.py' | xargs -I'{}' sh -c 'python {} >/dev/null 2>&1 || (echo "{} failed" ; exit 1)'
+
+	@echo ""
 
 .PHONY: testcov
 testcov: test
 	@echo "building coverage html"
 	@coverage html
 
-.PHONY: testcov-compile
-testcov-compile: build-cython-trace test
-	@echo "building coverage html"
-	@coverage html
-
-.PHONY: test-examples
-test-examples:
-	@echo "running examples"
-	@find docs/examples -type f -name '*.py' | xargs -I'{}' sh -c 'python {} >/dev/null 2>&1 || (echo "{} failed")'
-
 .PHONY: all
-all: lint mypy testcov
-
-.PHONY: benchmark-all
-benchmark-all:
-	python benchmarks/run.py
-
-.PHONY: benchmark-pydantic
-benchmark-pydantic:
-	python benchmarks/run.py pydantic-only
-
-.PHONY: benchmark-json
-benchmark-json:
-	TEST_JSON=1 python benchmarks/run.py
+all: lint mypy test
 
 .PHONY: clean
 clean:
+	@echo "---------------------------"
+	@echo "- Cleaning unwanted files -"
+	@echo "---------------------------"
+
 	rm -rf `find . -name __pycache__`
 	rm -f `find . -type f -name '*.py[co]' `
 	rm -f `find . -type f -name '*~' `
@@ -72,35 +105,35 @@ clean:
 	rm -f .coverage.*
 	rm -rf build
 	rm -rf dist
-	rm -f pydantic/*.c pydantic/*.so
+	rm -f src/*.c pydantic/*.so
 	python setup.py clean
 	rm -rf site
 	rm -rf docs/_build
 	rm -rf docs/.changelog.md docs/.version.md docs/.tmp_schema_mappings.html
-	rm -rf fastapi/test.db
 	rm -rf codecov.sh
 	rm -rf coverage.xml
 
-.PHONY: docs
-docs:
-	flake8 --max-line-length=80 docs/examples/
-	python docs/build/main.py
-	mkdocs build
+	@echo ""
 
-.PHONY: docs-serve
-docs-serve:
-	python docs/build/main.py
+.PHONY: docs
+docs: test-examples
+	@echo "-------------------------"
+	@echo "- Serving documentation -"
+	@echo "-------------------------"
+
 	mkdocs serve
 
-.PHONY: publish-docs
-publish-docs: docs
-	zip -r site.zip site
-	@curl -H "Content-Type: application/zip" -H "Authorization: Bearer ${NETLIFY}" \
-	      --data-binary "@site.zip" https://api.netlify.com/api/v1/sites/pydantic-docs.netlify.com/deploys
+	@echo ""
 
-fastapi:
-	git clone https://github.com/tiangolo/fastapi.git
+.PHONY: build-docs
+build-docs: test-examples
+	@echo "--------------------------"
+	@echo "- Building documentation -"
+	@echo "--------------------------"
 
-.PHONY: test-fastapi
-test-fastapi: install fastapi
-	./tests/test_fastapi.sh
+	mkdocs build
+	@echo ""
+
+.PHONY: version
+version:
+	@python -c "import repository_pattern.version; print(repository_pattern.version.version_info())"
