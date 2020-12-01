@@ -4,28 +4,14 @@ about: Suggest a new feature or change to repository-pattern
 labels: feature request
 ---
 
-### Checks
+## Description
+<!-- A clear and concise description for us to know your idea. -->
 
-* [ ] I added a descriptive title to this issue.
-* [ ] I have searched (google, github) for similar issues and couldn't find
-    anything.
-* [ ] I have read and followed [the docs](https://lyz-code.github.io/repository-pattern)
-    and still think this feature/change is needed.
+## Possible Solution
+<!-- A clear and concise description of what you want to happen. -->
 
-# Feature Request
+## Additional context
+<!-- Add any other context or screenshots about the feature request here. -->
 
-Output of `python -c "import repository_pattern.version; print(repository_pattern.version.version_info())"`
-
-```
-...
-```
-
-<!-- Please read the [docs](https://lyz-code.github.io/repository-pattern) and
-search through issues to confirm your feature hasn't already been reported. -->
-
-<!-- Where possible please include a self-contained code snippet describing your
-feature: -->
-
-```py
-...
-```
+## Related Issue
+<!-- If applicable, add link to existing issue also help us know better. -->

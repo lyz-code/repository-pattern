@@ -1,20 +1,24 @@
+"""Python package building configuration."""
+
+import re
 from glob import glob
 from os.path import basename, splitext
-from typing import Dict
 
 from setuptools import find_packages, setup
 
-# Avoid loading the package before requirements are installed:
-version: Dict = {}
+# Avoid loading the package to extract the version
 with open("src/repository_pattern/version.py") as fp:
-    exec(fp.read(), version)
+    version_match = re.search(r'__version__ = "(?P<version>.*)"', fp.read())
+    if version_match is None:
+        raise ValueError("The version is not specified in the version.py file.")
+    version = version_match["version"]
 
 setup(
     name="repository-pattern",
-    version=version["__version__"],
-    description="Library to ease the implementation of the repository pattern.",
+    version=version,
+    description="A Cookiecutter template for creating Python projects",
     author="Lyz",
-    author_email="lyz@riseup.net",
+    author_email="lyz-code-security-advisories@riseup.net",
     license="GNU General Public License v3",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",

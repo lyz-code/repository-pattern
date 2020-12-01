@@ -1,11 +1,4 @@
-"""
-Module to store a default model use case to use in the tests.
-
-Classes:
-    Author:
-    Book:
-    Genre:
-"""
+"""Store a default model use case to use in the tests."""
 
 from datetime import datetime
 
@@ -13,20 +6,26 @@ from repository_pattern import Entity
 
 
 class Author(Entity):
-    id: str
+    """Entity to model the author of a book."""
+
+    ID: str
     first_name: str
     last_name: str
     country: str
 
 
 class Book(Entity):
-    id: int
+    """Entity to model a book."""
+
+    ID: int
     title: str
     summary: str
     released: datetime
 
 
 class Genre(Entity):
-    id: int
+    """Entity to model the genre of a book."""
+
+    ID: int
     name: str
     description: str

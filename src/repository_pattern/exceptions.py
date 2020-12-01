@@ -7,4 +7,4 @@ Exceptions:
 
 
 class EntityNotFoundError(Exception):
-    pass
+    """Raised when the search or retrieve of an entity fails."""

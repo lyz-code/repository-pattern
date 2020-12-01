@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := all
-isort = isort src docs/examples tests
-black = black --target-version py37 src docs/examples tests
+isort = isort src docs/examples tests setup.py
+black = black --target-version py37 src docs/examples tests setup.py
 
 .PHONY: install
 install:
@@ -16,8 +16,8 @@ update:
 	@echo "-------------------------"
 
 	pip-compile -U --allow-unsafe
-	pip-compile -U --allow-unsafe requirements-dev.in --output-file requirements-dev.txt
 	pip-compile -U --allow-unsafe docs/requirements.in --output-file docs/requirements.txt
+	pip-compile -U --allow-unsafe requirements-dev.in --output-file requirements-dev.txt
 	pip install -r requirements-dev.txt
 
 	@echo ""
@@ -39,7 +39,7 @@ lint:
 	@echo "- Testing the lint -"
 	@echo "--------------------"
 
-	flake8 src/ tests/
+	flakehell lint src/ tests/ setup.py
 	$(isort) --check-only --df
 	$(black) --check --diff
 
@@ -51,11 +51,11 @@ mypy:
 	@echo "- Testing mypy -"
 	@echo "----------------"
 
-	mypy src
+	mypy src tests
 
 	@echo ""
 
-.PHONY: test-code
+.PHONY: test
 test: test-code test-examples
 
 .PHONY: test-code
@@ -64,7 +64,7 @@ test-code:
 	@echo "- Testing code -"
 	@echo "----------------"
 
-	python -m pytest --cov-report term-missing --cov src tests
+	pytest --cov-report term-missing --cov src tests ${ARGS}
 
 	@echo ""
 
@@ -78,13 +78,8 @@ test-examples:
 
 	@echo ""
 
-.PHONY: testcov
-testcov: test
-	@echo "building coverage html"
-	@coverage html
-
 .PHONY: all
-all: lint mypy test
+all: lint mypy test security
 
 .PHONY: clean
 clean:
@@ -132,6 +127,18 @@ build-docs: test-examples
 	@echo "--------------------------"
 
 	mkdocs build
+	@echo ""
+
+.PHONY: security
+security:
+	@echo "--------------------"
+	@echo "- Testing security -"
+	@echo "--------------------"
+
+	safety check
+	@echo ""
+	bandit -r src
+
 	@echo ""
 
 .PHONY: version

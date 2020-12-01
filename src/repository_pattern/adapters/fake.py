@@ -1,9 +1,4 @@
-"""
-Module to store the fake repository implementation.
-
-Classes:
-    FakeRepository: Implement the repository pattern using the SQLAlchemy ORM.
-"""
+"""Store the fake repository implementation."""
 
 
 import logging
@@ -11,7 +6,9 @@ import re
 from typing import Dict, List, Type, Union
 
 from deepdiff import extract, grep
-from pydantic import BaseModel, Field
+
+# [Pydantic issue](https://github.com/samuelcolvin/pydantic/issues/1961)
+from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
 
 from .. import AbstractRepository
 from ..exceptions import EntityNotFoundError
@@ -21,95 +18,106 @@ log = logging.getLogger(__name__)
 
 
 class FakeRepository(BaseModel, AbstractRepository):
-    """
-    Class to implement the repository pattern using a memory dictionary.
+    """Implement the repository pattern using a memory dictionary."""
 
-    Abstract Methods:
-        add: Append an entity to the repository.
-        all: Obtain all the entities of a type from the repository.
-        commit: Persist the changes into the repository.
-        delete: Remove an entity from the repository.
-        get: Obtain an entity from the repository by it's ID.
-        search: Obtain the entities whose attribute match a condition.
-    """
-
-    entities: Dict[Type[Entity], Dict[Union[int, str], Entity]] = Field(
+    entities: Dict[Type[Entity], Dict[Union[str, int], Entity]] = Field(  # noqa: TAE002
         default_factory=dict
     )
 
-    def add(self, entity: Entity):
-        """
-        Method to append an entity to the repository.
-        """
+    def add(self, entity: Entity) -> None:
+        """Append an entity to the repository.
 
+        Args:
+            entity: Entity to add to the repository.
+        """
         try:
             self.entities[type(entity)]
         except KeyError:
             self.entities[type(entity)] = {}
 
-        self.entities[type(entity)][entity.id] = entity
+        self.entities[type(entity)][entity.ID] = entity
 
-    def get(self, entity_model: Type[Entity], entity_id: str) -> Entity:
+    def delete(self, entity: Entity) -> None:
+        """Delete an entity from the repository.
+
+        Args:
+            entity: Entity to remove from the repository.
         """
-        Method to obtain an entity from the repository by it's ID.
+        try:
+            self.entities[type(entity)].pop(entity.ID, None)
+        except KeyError as error:
+            raise EntityNotFoundError(
+                f"Unable to delete entity {entity} because it's not in the repository"
+            ) from error
+
+    def get(self, entity_model: Type[Entity], entity_id: Union[str, int]) -> Entity:
+        """Obtain an entity from the repository by it's ID.
+
+        Args:
+            entity_model: Type of entity object to obtain.
+            entity_id: ID of the entity object to obtain.
+
+        Returns:
+            entity: Entity object that matches the search criteria.
+
+        Raises:
+            EntityNotFoundError: If the entity is not found.
         """
         try:
             entity = self.entities[entity_model][entity_id]
-        except KeyError:
+        except KeyError as error:
             raise EntityNotFoundError(
                 f"There are no {entity_model.__name__}s "
                 f"with id {entity_id} in the repository."
-            )
+            ) from error
 
         return entity
 
     def all(self, entity_model: Type[Entity]) -> List[Entity]:
-        """
-        Method to obtain all the entities of a type from the repository.
+        """Obtain all the entities of a type from the repository.
+
+        Args:
+            entity_model: Type of entity objects to obtain.
+
+        Returns:
+            entities: List of Entity object that matches the search criteria.
+
+        Raises:
+            EntityNotFoundError: If the entities are not found.
         """
         try:
             return sorted(
-                [entity for entity_id, entity in self.entities[entity_model].items()]
+                entity for entity_id, entity in self.entities[entity_model].items()
             )
-        except KeyError:
+        except KeyError as error:
             raise EntityNotFoundError(
                 f"There are no {entity_model.__name__}s entities in the repository"
-            )
-
-    def delete(self, entity: Entity) -> None:
-        """
-        Method to remove an entity from the repository.
-        """
-        try:
-            self.entities[type(entity)].pop(entity.id, None)
-        except KeyError:
-            raise EntityNotFoundError(
-                f"Unable to delete entity {entity} because it's not in the repository"
-            )
+            ) from error
 
     def commit(self) -> None:
-        """
-        Method to persist the changes into the repository.
-        """
-
+        """Persist the changes into the repository."""
         # They are saved when adding them, if we want to mimic the behaviour of the
         # other repositories, we should save the objects in a temporal list and move
         # them to the real set when using this method.
-        pass
 
-    def search(self, entity_model: Type[Entity], fields: Dict) -> List[Entity]:
-        """
-        Method to obtain the entities whose attributes match one or several conditions.
+    def search(
+        self, entity_model: Type[Entity], fields: Dict[str, Union[str, int]]
+    ) -> List[Entity]:
+        """Obtain the entities whose attributes match one or several conditions.
 
-        fields is a dictionary with the `key`:`value` to search.
+        Args:
+            entity_model: Type of entity object to obtain.
+            fields: Dictionary with the {key}:{value} to search.
 
-        It assumes that the attributes of the entities are str.
+        Returns:
+            entities: List of Entity object that matches the search criteria.
 
-        If None is found an EntityNotFoundError is raised.
+        Raises:
+            EntityNotFoundError: If the entities are not found.
         """
         all_entities = self.all(entity_model)
-        entities_dict = {entity.id: entity for entity in all_entities}
-        entity_attributes = {entity.id: entity.dict() for entity in all_entities}
+        entities_dict = {entity.ID: entity for entity in all_entities}
+        entity_attributes = {entity.ID: entity.dict() for entity in all_entities}
         error_msg = (
             f"There are no {entity_model.__name__}s that match "
             f"the search filter {fields}"
@@ -122,8 +130,8 @@ class FakeRepository(BaseModel, AbstractRepository):
 
             try:
                 entities_with_value["matched_values"]
-            except KeyError:
-                raise EntityNotFoundError(error_msg)
+            except KeyError as error:
+                raise EntityNotFoundError(error_msg) from error
 
             for path in entities_with_value["matched_values"]:
                 entity_id = re.sub(r"root\[(.*?)\]\[.*", r"\1", path)
@@ -146,5 +154,4 @@ class FakeRepository(BaseModel, AbstractRepository):
 
         if len(entities) == 0:
             raise EntityNotFoundError(error_msg)
-        else:
-            return entities
+        return entities

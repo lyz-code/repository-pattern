@@ -1,27 +1,19 @@
-#!/usr/bin/python3
-
-# Copyright (C) 2020 lyz <lyz@riseup.net>
-# This file is part of pydo.
-#
-# pydo is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# pydo is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with pydo.  If not, see <http://www.gnu.org/licenses/>.
+"""Library to ease the implementation of the repository pattern in python projects.."""
 
 from typing import TypeVar
 
-from .adapters import AbstractRepository  # noqa
+from .adapters import AbstractRepository
 from .adapters.fake import FakeRepository
-from .exceptions import EntityNotFoundError  # noqa
-from .model import Entity  # noqa
+from .exceptions import EntityNotFoundError
+from .model import Entity
 
 # Need to put it twice because TypeVar doesn't support only one argument
 Repository = TypeVar("Repository", FakeRepository, FakeRepository)
+
+__all__ = [
+    "AbstractRepository",
+    "Entity",
+    "EntityNotFoundError",
+    "FakeRepository",
+    "Repository",
+]

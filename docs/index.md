@@ -1,14 +1,10 @@
----
-title: Repository Pattern
-date: 20201015
-author: Lyz
----
-
-
-[![Actions Status](https://github.com/lyz-code/repository-pattern/workflows/Python%20package/badge.svg)](https://github.com/lyz-code/repository-pattern/actions)
+[![Actions Status](https://github.com/lyz-code/repository-pattern/workflows/Tests/badge.svg)](https://github.com/lyz-code/repository-pattern/actions)
+[![Actions Status](https://github.com/lyz-code/repository-pattern/workflows/Build/badge.svg)](https://github.com/lyz-code/repository-pattern/actions)
+[![Coverage Status](https://coveralls.io/repos/github/lyz-code/repository-pattern/badge.svg?branch=master)](https://coveralls.io/github/lyz-code/repository-pattern?branch=master)
 
 Library to ease the implementation of the [repository
-pattern](https://lyz-code.github.io/blue-book/architecture/repository_pattern/).
+pattern](https://lyz-code.github.io/blue-book/architecture/repository_pattern/)
+in python projects.
 
 One of the disadvantages of using the repository pattern is that developers need
 to add and maintain a new abstraction to manage how to persist their models
@@ -28,7 +24,7 @@ pip install repository-pattern
 # A Simple Example
 
 ```python
-{! examples/simple-example.py !}
+{! examples/simple-example.py !} # noqa
 ```
 
 # Usage
@@ -58,6 +54,6 @@ The different repositories share the following operations:
 
 # Contributing
 
-For guidance on setting up a development environment and how to make
+For guidance on setting up a development environment, and how to make
 a contribution to *repository-pattern*, see [Contributing to
-repository-pattern](contributing.md).
+repository-pattern](https://lyz-code.github.io/repository-pattern/contributing).

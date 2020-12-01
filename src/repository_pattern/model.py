@@ -1,28 +1,45 @@
+"""Module to store the common business model of all entities."""
+
 from typing import Union
 
 from pydantic import BaseModel
 
 
 class Entity(BaseModel):
-    id: Union[int, str]
+    """Model of any object no defined by it's attributes whom instead has an identity.
 
-    def __lt__(self, other) -> bool:
-        """
-        Internal Python method to compare class objects.
-        """
+    Unlike value objects, they have *identity equality*. We can change their values, and
+    they are still recognizably the same thing.
+    """
 
-        return self.id < other.id
+    ID: Union[int, str]
 
-    def __gt__(self, other) -> bool:
-        """
-        Internal Python method to compare class objects.
-        """
+    def __lt__(self, other: "Entity") -> bool:
+        """Assert if an object is smaller than us.
 
-        return self.id > other.id
+        Args:
+            other: Entity to compare.
+
+        Raises:
+            TypeError: If the id type of the objects is not compatible.
+        """
+        if not isinstance(other.ID, type(self.ID)):
+            raise TypeError(f"{self} and {other} have incompatible ID types")
+        return self.ID < other.ID  # type: ignore
+
+    def __gt__(self, other: "Entity") -> bool:
+        """Assert if an object is greater than us.
+
+        Args:
+            other: Entity to compare.
+
+        Raises:
+            TypeError: If the id type of the objects is not compatible.
+        """
+        if not isinstance(other.ID, type(self.ID)):
+            raise TypeError(f"{self} and {other} have incompatible ID types")
+        return self.ID > other.ID  # type: ignore
 
     def __hash__(self) -> int:
-        """
-        Internal Python method to create an unique hash of the class object.
-        """
-
-        return hash(self.id)
+        """Create an unique hash of the class object."""
+        return hash(self.ID)

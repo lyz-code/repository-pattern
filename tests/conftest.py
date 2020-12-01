@@ -12,16 +12,14 @@ import sqlite3
 from typing import Generator
 
 import pytest
+from py.path import local  # noqa: E0401, E0611, local does exist in py.path
 
 pytest_plugins = ["tests.fixtures"]
 
 
-@pytest.fixture
-def sqlite_db(tmpdir) -> Generator[sqlite3.Cursor, None, None]:
-    """
-    Fixture to create an SQLite database engine.
-    """
-
+@pytest.fixture()
+def sqlite_db(tmpdir: local) -> Generator[sqlite3.Cursor, None, None]:
+    """Create an SQLite database engine."""
     sqlite_file_path = str(tmpdir.join("sqlite.db"))
     open(sqlite_file_path, "a").close()
 

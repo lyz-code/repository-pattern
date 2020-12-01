@@ -1,5 +1,4 @@
-"""
-Module to store the storage repository abstractions.
+"""Module to store the functions shared by the different adapters.
 
 Abstract Classes:
     AbstractRepository: Gathers common methods and define the interface of the
@@ -11,7 +10,7 @@ References:
 
 import abc
 import logging
-from typing import Dict, List, Optional, Type
+from typing import Dict, List, Optional, Type, Union
 
 from ..model import Entity
 
@@ -19,74 +18,89 @@ log = logging.getLogger(__name__)
 
 
 class AbstractRepository(abc.ABC):
-    """
-    Abstract class to gathers common methods and define the interface of the
-    repositories.
+    """Gather common methods and define the interface of the repositories.
 
-    Properties:
+    Attributes:
         database_url: URL specifying the connection to the database.
-
-    Abstract Methods:
-        add: Append an entity to the repository.
-        all: Obtain all the entities of a type from the repository.
-        commit: Persist the changes into the repository.
-        delete: Remove an entity from the repository.
-        get: Obtain an entity from the repository by it's ID.
-        search: Obtain the entities whose attribute match one or several conditions.
     """
 
     @abc.abstractmethod
     def __init__(self, database_url: Optional[str] = None) -> None:
+        """Initialize the repository attributes.
+
+        Args:
+            database_url: URL specifying the connection to the database.
+        """
         self.database_url = database_url
 
     @abc.abstractmethod
     def add(self, entity: Entity) -> None:
-        """
-        Method to append an entity to the repository.
-        """
+        """Append an entity to the repository.
 
+        Args:
+            entity: Entity to add to the repository.
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def delete(self, entity: Entity) -> None:
-        """
-        Method to delete an entity from the repository.
-        """
+        """Delete an entity from the repository.
 
+        Args:
+            entity: Entity to remove from the repository.
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get(self, entity_model: Type[Entity], entity_id: str) -> Entity:
-        """
-        Method to obtain an entity from the repository by it's ID.
-        """
+    def get(self, entity_model: Type[Entity], entity_id: Union[str, int]) -> Entity:
+        """Obtain an entity from the repository by it's ID.
 
+        Args:
+            entity_model: Type of entity object to obtain.
+            entity_id: ID of the entity object to obtain.
+
+        Returns:
+            entity: Entity object that matches the search criteria.
+
+        Raises:
+            EntityNotFoundError: If the entity is not found.
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def all(self, entity_model: Type[Entity]) -> List[Entity]:
-        """
-        Method to obtain all the entities of a type from the repository.
-        """
+        """Obtain all the entities of a type from the repository.
 
+        Args:
+            entity_model: Type of entity objects to obtain.
+
+        Returns:
+            entities: List of Entity object that matches the search criteria.
+
+        Raises:
+            EntityNotFoundError: If the entities are not found.
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def commit(self) -> None:
-        """
-        Method to persist the changes into the repository.
-        """
-
+        """Persist the changes into the repository."""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def search(self, entity_model: Type[Entity], fields: Dict) -> List[Entity]:
+    def search(
+        self, entity_model: Type[Entity], fields: Dict[str, Union[str, int]]
+    ) -> List[Entity]:
+        """Obtain the entities whose attributes match one or several conditions.
+
+        Args:
+            entity_model: Type of entity object to obtain.
+            fields: Dictionary with the {key}:{value} to search.
+
+        Returns:
+            entities: List of Entity object that matches the search criteria.
+
+        Raises:
+            EntityNotFoundError: If the entities are not found.
         """
-        Method to obtain the entities whose attributes match one or several conditions.
-
-        fields is a dictionary with the {key}:{value} to search.
-
-        If None is found an EntityNotFoundError is raised.
-        """
-
         raise NotImplementedError
