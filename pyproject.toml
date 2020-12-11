@@ -72,6 +72,7 @@ flake8-aaa = ["+*"]
 flake8-annotations = [
   "+*",
   "-ANN101", # There is usually no need to type the self argument of class methods.
+  "-ANN102", # There is usually no need to type the cls argument of class methods.
 ]
 flake8-annotations-complexity = ["+*"]
 flake8-bugbear = ["+*"]
@@ -97,11 +98,7 @@ flake8-typing-imports = [
 ]
 flake8-variables-names = ["+*"]
 dlint = ["+*"]
-pylint = [
-  "+*",
-  "-C0411", # %s should be placed before %s,
-           # see https://github.com/PyCQA/pylint/issues/2175 and https://github.com/PyCQA/pylint/issues/1797
-]
+pylint = ["+*"]
 mccabe = ["+*"]
 pep8-naming = ["+*"]
 pycodestyle = [
@@ -120,16 +117,10 @@ flake8-docstrings = [
 flake8-annotations = [
   "-ANN001"
 ]
-pylint = [
-  "-R0201", # Method could be a function. Raised because the methods of a test class
-            # don't use the self object, which is not wrong.
-]
-
-[tool.flakehell.exceptions."tests/fixtures.py"]
-pylint = [
-  "-W0621", # As we're using pytest cases I still don't know how to fix this in a clean
-            # way.
-]
+# pylint = [
+#   "-R0201", # Method could be a function. Raised because the methods of a test class
+#             # don't use the self object, which is not wrong.
+# ]
 
 [tool.flakehell.exceptions."tests/factories.py"]
 pylint = [
@@ -139,28 +130,28 @@ pylint = [
 [tool.flakehell.exceptions."tests/model.py"]
 pylint = [
   "-R0903", # Too few methods warning, but is the way to define entities.
-]
-
-[tool.flakehell.exceptions."tests/integration/test_repository.py"]
-flake8-aaa = [
-  "-AAA01", # Most cases have the setup phase of tests defined by their fixtures.
+#  "-R0201", # Method could be a function. Raised because the methods of a test class
+#            # don't use the self object, which is not wrong.
 ]
 flake8-docstrings = [
   "-D400", # First line should end with a period, doesn't make sense for test methods
   "-D205"  # 1 blank line required between summary line and description
 ]
+
+[tool.flakehell.exceptions."tests/migrations/"]
 pylint = [
-  "-R0201", # Method could be a function. Raised because the methods of a test class
-            # don't use the self object, which is not wrong.
+  "-C0103", # Module name of the migration scripts doesn't conform to snake_case naming style.
 ]
 
-
+[tool.flakehell.exceptions."tests/cases"]
+pylint = [
+  "-R0201", # Method could be a function. Raised because the methods of the case classes
+            # don't seem to use the self object. But they do, as if we change them to
+            # staticmethod or classmethods the tests don't get run.
+]
 # --------- Pylint -------------
-[tool.pylint]
-extension-pkg-whitelist = 'pydantic'
-
-[tool.pylint.'TYPECHECK']
-generated-members = "sh"
+# [tool.pylint.'TYPECHECK']
+# generated-members = "sh"
 
 # --------- Build-system -------------
 

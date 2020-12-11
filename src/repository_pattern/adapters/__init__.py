@@ -10,7 +10,7 @@ References:
 
 import abc
 import logging
-from typing import Dict, List, Optional, Type, Union
+from typing import Dict, List, Type, Union
 
 from ..model import Entity
 
@@ -25,7 +25,7 @@ class AbstractRepository(abc.ABC):
     """
 
     @abc.abstractmethod
-    def __init__(self, database_url: Optional[str] = None) -> None:
+    def __init__(self, database_url: str = "") -> None:
         """Initialize the repository attributes.
 
         Args:
@@ -102,5 +102,15 @@ class AbstractRepository(abc.ABC):
 
         Raises:
             EntityNotFoundError: If the entities are not found.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def apply_migrations(self, migrations_directory: str) -> None:
+        """Run the migrations of the repository schema.
+
+        Args:
+            migrations_directory: path to the directory containing the migration
+                scripts.
         """
         raise NotImplementedError

@@ -2,7 +2,10 @@
 
 from typing import Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel  # noqa: E0611
+
+# E0611: No name 'BaseModel' in module 'pydantic'
+# https://github.com/samuelcolvin/pydantic/issues/1961
 
 
 class Entity(BaseModel):

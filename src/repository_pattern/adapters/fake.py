@@ -1,28 +1,36 @@
 """Store the fake repository implementation."""
 
 
+import copy
 import logging
 import re
-from typing import Dict, List, Type, Union
+from typing import Any, Dict, List, Type, Union
 
 from deepdiff import extract, grep
 
 # [Pydantic issue](https://github.com/samuelcolvin/pydantic/issues/1961)
 from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
 
-from .. import AbstractRepository
 from ..exceptions import EntityNotFoundError
 from ..model import Entity
+from . import AbstractRepository
 
 log = logging.getLogger(__name__)
+
+FakeRepositoryDB = Dict[Type[Entity], Dict[Union[str, int], Entity]]
 
 
 class FakeRepository(BaseModel, AbstractRepository):
     """Implement the repository pattern using a memory dictionary."""
 
-    entities: Dict[Type[Entity], Dict[Union[str, int], Entity]] = Field(  # noqa: TAE002
-        default_factory=dict
-    )
+    entities: FakeRepositoryDB = Field(default_factory=dict)
+    new_entities: FakeRepositoryDB = Field(default_factory=dict)
+
+    def __init__(self, database_url: str = "", **data: Any) -> None:
+        """Initialize the repository attributes."""
+        super().__init__(**data)
+        if database_url == "wrong_database_url":
+            raise ConnectionError(f"There is no database file: {database_url}")
 
     def add(self, entity: Entity) -> None:
         """Append an entity to the repository.
@@ -30,12 +38,14 @@ class FakeRepository(BaseModel, AbstractRepository):
         Args:
             entity: Entity to add to the repository.
         """
+        if self.new_entities == {}:
+            self.new_entities = copy.deepcopy(self.entities.copy())
         try:
-            self.entities[type(entity)]
+            self.new_entities[type(entity)]
         except KeyError:
-            self.entities[type(entity)] = {}
+            self.new_entities[type(entity)] = {}
 
-        self.entities[type(entity)][entity.ID] = entity
+        self.new_entities[type(entity)][entity.ID] = entity
 
     def delete(self, entity: Entity) -> None:
         """Delete an entity from the repository.
@@ -43,8 +53,10 @@ class FakeRepository(BaseModel, AbstractRepository):
         Args:
             entity: Entity to remove from the repository.
         """
+        if self.new_entities == {}:
+            self.new_entities = copy.deepcopy(self.entities.copy())
         try:
-            self.entities[type(entity)].pop(entity.ID, None)
+            self.new_entities[type(entity)].pop(entity.ID, None)
         except KeyError as error:
             raise EntityNotFoundError(
                 f"Unable to delete entity {entity} because it's not in the repository"
@@ -96,9 +108,9 @@ class FakeRepository(BaseModel, AbstractRepository):
 
     def commit(self) -> None:
         """Persist the changes into the repository."""
-        # They are saved when adding them, if we want to mimic the behaviour of the
-        # other repositories, we should save the objects in a temporal list and move
-        # them to the real set when using this method.
+        for entity_model, entities in self.new_entities.items():
+            self.entities[entity_model] = entities
+        self.new_entities = {}
 
     def search(
         self, entity_model: Type[Entity], fields: Dict[str, Union[str, int]]
@@ -155,3 +167,12 @@ class FakeRepository(BaseModel, AbstractRepository):
         if len(entities) == 0:
             raise EntityNotFoundError(error_msg)
         return entities
+
+    def apply_migrations(self, migrations_directory: str) -> None:
+        """Run the migrations of the repository schema.
+
+        Args:
+            migrations_directory: path to the directory containing the migration
+                scripts.
+        """
+        # The fake repository doesn't have any schema
