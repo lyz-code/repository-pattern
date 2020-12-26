@@ -1,105 +1,12 @@
-"""Gather the tester classes used by the repository tests."""
-
-
-import abc
 import logging
 import sqlite3
-from typing import Any, Generator, Generic, List, Type, TypeVar
+from typing import Generator, List, Type
 
 from _pytest.logging import LogCaptureFixture
-from pypika import Query, Table
 
-from repository_pattern import (
-    Entity,
-    FakeRepository,
-    FakeRepositoryDB,
-    PypikaRepository,
-    Repository,
-)
-from repository_pattern.exceptions import EntityNotFoundError
-
-RepositoryTester = TypeVar(
-    "RepositoryTester",
-    "FakeRepositoryTester",
-    "PypikaRepositoryTester",
-)
-
-
-class AbstractRepositoryTester(abc.ABC, Generic[Repository]):
-    """Gather common methods and define the interface of the repository testers."""
-
-    @abc.abstractmethod
-    def assert_schema_exists(self, database: Any, caplog: LogCaptureFixture) -> None:
-        """Make sure that the repository has a valid schema."""
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def apply_migrations(self, repo: Repository) -> None:
-        """Apply the repository migrations."""
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def get_entity(self, database: Any, entity: Entity) -> Entity:
-        """Get the entity object from the data stored in the repository by it's id."""
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def get_all(self, database: Any, entity_model: Type[Entity]) -> List[Entity]:
-        """Get all the entities of type entity_model from the database."""
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def insert_entity(self, database: Any, entity: Entity) -> None:
-        """Insert the data of an entity into the repository."""
-        raise NotImplementedError
-
-
-# E1136: false positive: https://github.com/PyCQA/pylint/issues/2822
-# R0201: We can't define the method as a class function to maintain the parent interface
-# W0613: We require these arguments to maintain the parent interface.
-class FakeRepositoryTester(AbstractRepositoryTester[FakeRepository]):  # noqa: E1136
-    """Gathers methods needed to test the implementation of the FakeRepository."""
-
-    def apply_migrations(self, repo: FakeRepository) -> None:
-        """Apply the repository migrations."""
-
-    def assert_schema_exists(  # noqa: R0201
-        self,
-        database: FakeRepositoryDB,  # noqa: W0613
-        caplog: LogCaptureFixture,  # noqa: W0613
-    ) -> None:
-        """Make sure that the repository has a valid schema."""
-        # The fake repository has no schema
-        assert True
-
-    def get_entity(  # noqa: R0201
-        self, database: FakeRepositoryDB, entity: Entity
-    ) -> Entity:
-        """Get the entity object from the data stored in the repository by it's id."""
-        try:
-            return database[type(entity)][entity.ID]
-        except (TypeError, KeyError) as error:
-            raise EntityNotFoundError() from error
-
-    def get_all(  # noqa: R0201
-        self, database: FakeRepositoryDB, entity_model: Type[Entity]
-    ) -> List[Entity]:
-        """Get all the entities of type entity_model from the database."""
-        try:
-            return [entity for entity_id, entity in database[entity_model].items()]
-        except (TypeError, KeyError) as error:
-            raise EntityNotFoundError() from error
-
-    def insert_entity(  # noqa: R0201
-        self, database: FakeRepositoryDB, entity: Entity
-    ) -> None:
-        """Insert the data of an entity into the repository."""
-        try:
-            database[type(entity)]
-        except KeyError:
-            database[type(entity)] = {}
-
-        database[type(entity)][entity.ID] = entity
+from ...model import Entity
+from ..repositories.pypika import PypikaRepository
+from . import AbstractRepositoryTester
 
 
 # E1136 false positive: https://github.com/PyCQA/pylint/issues/2822

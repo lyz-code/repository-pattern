@@ -4,7 +4,15 @@ site_author: Lyz
 site_url: https://lyz-code.github.io/repository-pattern
 nav:
   - Overview: index.md
-  - Reference: reference.md
+  - Repositories:
+      - FakeRepository: fake_repository.md
+      - PypikaRepository: pypika_repository.md
+  - Models: models.md
+  - API Reference:
+      - Repository Implementations: reference_adapters.md
+      - Models: reference_models.md
+      - Exceptions: reference_exceptions.md
+  - Create new repository: new_repo.md
   - Contributing: contributing.md
 
 plugins:
@@ -13,7 +21,6 @@ plugins:
       handlers:
         python:
           rendering:
-            show_root_heading: true
             heading_level: 1
       watch:
         - src

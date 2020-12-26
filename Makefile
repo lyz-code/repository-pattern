@@ -1,4 +1,4 @@
-.DEFAULT_GOAL := all
+.DEFAULT_GOAL := test
 isort = isort src docs/examples tests setup.py
 black = black --target-version py37 src docs/examples tests setup.py
 

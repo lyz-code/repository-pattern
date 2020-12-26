@@ -25,7 +25,13 @@ setup(
     url="https://github.com/lyz-code/repository-pattern",
     packages=find_packages("src"),
     package_dir={"": "src"},
+    package_data={"repository_pattern": ["py.typed"]},
     py_modules=[splitext(basename(path))[0] for path in glob("src/*.py")],
+    entry_points={
+        "pytest11": [
+            "repository-pattern = repository_pattern.fixtures",
+        ]
+    },
     python_requires=">=3.6",
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",

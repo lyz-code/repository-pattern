@@ -11,8 +11,8 @@ from deepdiff import extract, grep
 # [Pydantic issue](https://github.com/samuelcolvin/pydantic/issues/1961)
 from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
 
-from ..exceptions import EntityNotFoundError
-from ..model import Entity
+from ...exceptions import EntityNotFoundError
+from ...model import Entity
 from . import AbstractRepository  # , AbstractRepositoryTester
 
 log = logging.getLogger(__name__)

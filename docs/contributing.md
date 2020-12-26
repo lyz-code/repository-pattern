@@ -1,6 +1,6 @@
 We'd love you to contribute to *repository-pattern*!
 
-## Issues
+# Issues
 
 Questions, feature requests and bug reports are all welcome as issues.
 **To report a security vulnerability, please see our [security
@@ -18,7 +18,7 @@ or if you have `make` installed, you can use `make version`.
 Please try to always include the above unless you're unable to install `repository-pattern` or know it's not relevant to your question or
 feature request.
 
-## Pull Requests
+# Pull Requests
 
 *repository-pattern* is released regularly so you should see your
 improvements release in a matter of days or weeks.
@@ -31,7 +31,7 @@ If you're looking for something to get your teeth into, check out the ["help
 wanted"](https://github.com/lyz-code/repository-pattern/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22)
 label on github.
 
-## Development facilities
+# Development facilities
 
 To make contributing as easy and fast as possible, you'll want to run tests and
 linting locally.
