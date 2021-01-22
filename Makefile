@@ -15,9 +15,18 @@ update:
 	@echo "- Updating dependencies -"
 	@echo "-------------------------"
 
-	pip-compile -U --allow-unsafe
-	pip-compile -U --allow-unsafe docs/requirements.in --output-file docs/requirements.txt
-	pip-compile -U --allow-unsafe requirements-dev.in --output-file requirements-dev.txt
+	rm requirements.txt
+	touch requirements.txt
+	pip-compile -Ur --allow-unsafe
+
+	rm docs/requirements.txt
+	touch docs/requirements.txt
+	pip-compile -Ur --allow-unsafe docs/requirements.in --output-file docs/requirements.txt
+
+	rm requirements-dev.txt
+	touch requirements-dev.txt
+	pip-compile -Ur --allow-unsafe requirements-dev.in --output-file requirements-dev.txt
+
 	pip install -r requirements-dev.txt
 
 	@echo ""
@@ -191,4 +200,4 @@ security:
 
 .PHONY: version
 version:
-	@python -c "import repository_pattern.version; print(repository_pattern.version.version_info())"
+	@python -c "import repository_orm.version; print(repository_orm.version.version_info())"

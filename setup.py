@@ -7,7 +7,7 @@ from os.path import basename, splitext
 from setuptools import find_packages, setup
 
 # Avoid loading the package to extract the version
-with open("src/repository_pattern/version.py") as fp:
+with open("src/repository_orm/version.py") as fp:
     version_match = re.search(r'__version__ = "(?P<version>.*)"', fp.read())
     if version_match is None:
         raise ValueError("The version is not specified in the version.py file.")
@@ -15,7 +15,7 @@ with open("src/repository_pattern/version.py") as fp:
 
 
 setup(
-    name="repository-pattern",
+    name="repository-orm",
     version=version,
     description=(
         "Library to ease the implementation of the repository pattern in "
@@ -26,10 +26,10 @@ setup(
     license="GNU General Public License v3",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    url="https://github.com/lyz-code/repository-pattern",
+    url="https://github.com/lyz-code/repository-orm",
     packages=find_packages("src"),
     package_dir={"": "src"},
-    package_data={"repository_pattern": ["py.typed"]},
+    package_data={"repository_orm": ["py.typed"]},
     py_modules=[splitext(basename(path))[0] for path in glob("src/*.py")],
     python_requires=">=3.6",
     classifiers=[
@@ -46,11 +46,5 @@ setup(
         "Topic :: Utilities",
         "Natural Language :: English",
     ],
-    install_requires=[
-        "deepdiff",
-        "pydantic",
-        "pypika",
-        "pymysql",
-        "yoyo-migrations",
-    ],
+    install_requires=["deepdiff", "pydantic", "pypika", "pymysql", "yoyo-migrations"],
 )

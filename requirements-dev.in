@@ -5,8 +5,6 @@
 pytest
 pytest-cov
 pytest-pythonpath
-pytest-cases
-factory_boy
 
 # Linting
 yamllint

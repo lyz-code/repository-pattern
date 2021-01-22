@@ -1,12 +1,12 @@
 {
-  "template": "git@github.com:lyz-code/cookiecutter-python-project.git",
-  "commit": "74f3b8fdccb96b032b851b9735e2044e36f30a9b",
+  "template": "https://github.com/lyz-code/cookiecutter-python-project",
+  "commit": "fde960873086da40dc90492a33be536929c56f18",
   "context": {
     "cookiecutter": {
       "project_name": "Repository ORM",
       "project_slug": "repository-orm",
       "project_description": "Library to ease the implementation of the repository pattern in python projects.",
-      "requirements": "deepdiff,pydantic,pypika,pymysql, yoyo-migrations",
+      "requirements": "deepdiff, pydantic, pypika, yoyo-migrations",
       "configure_command_line": "False",
       "read_configuration_from_yaml": "False",
       "github_user": "lyz-code",
@@ -17,7 +17,7 @@
       "author_email": "lyz-code-security-advisories@riseup.net",
       "security_advisories_email": "lyz-code-security-advisories@riseup.net",
       "project_underscore_slug": "repository_orm",
-      "_template": "git@github.com:lyz-code/cookiecutter-python-project.git"
+      "_template": "https://github.com/lyz-code/cookiecutter-python-project"
     }
   },
   "directory": null

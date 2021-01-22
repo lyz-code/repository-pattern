@@ -1,7 +1,7 @@
 ---
-site_name: Repository Pattern
+site_name: Repository ORM
 site_author: Lyz
-site_url: https://lyz-code.github.io/repository-pattern
+site_url: https://lyz-code.github.io/repository-orm
 nav:
   - Overview: index.md
   - Repositories:
@@ -73,5 +73,5 @@ extra_css:
   - stylesheets/extra.css
   - stylesheets/links.css
 
-repo_name: lyz-code/repository-pattern
-repo_url: https://github.com/lyz-code/repository-pattern
+repo_name: lyz-code/repository-orm
+repo_url: https://github.com/lyz-code/repository-orm

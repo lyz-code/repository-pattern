@@ -39,7 +39,7 @@ But the following disadvantages:
     adds the *WTF factor* for Python programmers who've never seen this pattern
     before.
 
-*repository-pattern* aims to mitigate the last ones by:
+*repository-orm* aims to mitigate the last ones by:
 
 * Supplying classes that already have the common operations for different
     storage solutions.
@@ -49,7 +49,7 @@ But the following disadvantages:
 # Installing
 
 ```bash
-pip install repository-pattern
+pip install repository-orm
 ```
 
 # A Simple Example
@@ -89,7 +89,7 @@ The different repositories share the following operations:
 
 # References
 
-As most open sourced programs, `repository_pattern` is standing on the shoulders of
+As most open sourced programs, `repository-orm` is standing on the shoulders of
 giants, namely:
 
 [pydantic](https://pydantic-docs.helpmanual.io/)
@@ -146,5 +146,5 @@ giants, namely:
 # Contributing
 
 For guidance on setting up a development environment, and how to make
-a contribution to *repository-pattern*, see [Contributing to
-repository-pattern](https://lyz-code.github.io/repository-pattern/contributing).
+a contribution to *repository-orm*, see [Contributing to
+repository-orm](https://lyz-code.github.io/repository-orm/contributing).

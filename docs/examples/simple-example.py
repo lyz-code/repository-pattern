@@ -1,4 +1,4 @@
-from repository_pattern import Entity, FakeRepository
+from repository_orm import Entity, FakeRepository
 
 repo = FakeRepository()
 
