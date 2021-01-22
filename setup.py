@@ -47,7 +47,7 @@ setup(
         "Natural Language :: English",
     ],
     install_requires=[
-        "deepdiff[murmur]",
+        "deepdiff",
         "pydantic",
         "pypika",
         "pymysql",

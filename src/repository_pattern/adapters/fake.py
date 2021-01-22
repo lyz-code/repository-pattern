@@ -3,42 +3,68 @@
 import copy
 import logging
 import re
-from typing import Any, Dict, List, Type, TypeVar, Union
+from typing import Any, Dict, List, Type, Union
 
 from deepdiff import extract, grep
-
-# [Pydantic issue](https://github.com/samuelcolvin/pydantic/issues/1961)
-from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
+from pydantic import Field, validator
 
 from ..exceptions import EntityNotFoundError
-from ..model import Entity as EntityModel
+from ..model import EntityComposition, EntityMultipleComposition, EntityType
 from . import AbstractRepository
 
 log = logging.getLogger(__name__)
 
-Entity = TypeVar("Entity", bound=EntityModel)
 
-FakeRepositoryDB = Dict[Type[Entity], Dict[Union[str, int], Entity]]
+FakeRepositoryDB = Dict[Type[EntityType], Dict[Union[str, int], EntityType]]
 
 
-class FakeRepository(BaseModel, AbstractRepository):
+class FakeRepository(AbstractRepository):
     """Implement the repository pattern using a memory dictionary."""
 
+    database_url: str = "fake_repository"
     entities: FakeRepositoryDB[Any] = Field(default_factory=dict)
     new_entities: FakeRepositoryDB[Any] = Field(default_factory=dict)
 
-    def __init__(self, database_url: str = "", **data: Any) -> None:
-        """Initialize the repository attributes."""
-        super().__init__(**data)
+    @validator("database_url")
+    @classmethod
+    def raise_connection_error_with_wrong_url(cls, database_url: str) -> str:
+        """Raise ConnectionError if the database_url == wrong_database_url.
+
+        For testing purposes.
+        """
         if database_url == "wrong_database_url":
             raise ConnectionError(f"There is no database file: {database_url}")
+        return database_url
 
-    def add(self, entity: Entity) -> None:
+    def add(self, entity: EntityType) -> None:
+        """Append an entity with it's relationships to the repository.
+
+        Args:
+            entity: Entity to add to the repository.
+        """
+        for relationship in self.mapper.get_relationships(entity):
+            if not relationship.is_source(entity):
+                continue
+            if relationship.is_(EntityComposition):
+                destination = getattr(entity, relationship.source_attribute)
+                self._add(destination)
+            elif relationship.is_(EntityMultipleComposition):
+                destination_entities = sorted(
+                    getattr(entity, relationship.source_attribute)
+                )
+                setattr(entity, relationship.source_attribute, destination_entities)
+                for destination_entity in destination_entities:
+                    self._add(destination_entity)
+        self._add(entity)
+
+    def _add(self, entity: EntityType) -> None:
         """Append an entity to the repository.
 
         Args:
             entity: Entity to add to the repository.
         """
+        if entity is None:
+            return
         if self.new_entities == {}:
             self.new_entities = copy.deepcopy(self.entities.copy())
         try:
@@ -48,7 +74,34 @@ class FakeRepository(BaseModel, AbstractRepository):
 
         self.new_entities[type(entity)][entity.id_] = entity
 
-    def delete(self, entity: Entity) -> None:
+    def get(
+        self,
+        entity_model: Type[EntityType],
+        entity_id: Union[str, int],
+    ) -> EntityType:
+        """Obtain an entity from the repository by it's ID.
+
+        Args:
+            entity_model: Type of entity object to obtain.
+            entity_id: ID of the entity object to obtain.
+
+        Returns:
+            entity: Entity object that matches the search criteria.
+
+        Raises:
+            EntityNotFoundError: If the entity is not found.
+        """
+        try:
+            entity = self.entities[entity_model][entity_id]
+        except KeyError as error:
+            raise EntityNotFoundError(
+                f"There are no {entity_model.class_name()}s "
+                f"with id {entity_id} in the repository."
+            ) from error
+
+        return entity
+
+    def delete(self, entity: EntityType) -> None:
         """Delete an entity from the repository.
 
         Args:
@@ -66,30 +119,7 @@ class FakeRepository(BaseModel, AbstractRepository):
                 f"Unable to delete entity {entity} because it's not in the repository"
             ) from error
 
-    def get(self, entity_model: Type[Entity], entity_id: Union[str, int]) -> Entity:
-        """Obtain an entity from the repository by it's ID.
-
-        Args:
-            entity_model: Type of entity object to obtain.
-            entity_id: ID of the entity object to obtain.
-
-        Returns:
-            entity: Entity object that matches the search criteria.
-
-        Raises:
-            EntityNotFoundError: If the entity is not found.
-        """
-        try:
-            entity = self.entities[entity_model][entity_id]
-        except KeyError as error:
-            raise EntityNotFoundError(
-                f"There are no {entity_model.__name__}s "
-                f"with id {entity_id} in the repository."
-            ) from error
-
-        return entity
-
-    def all(self, entity_model: Type[Entity]) -> List[Entity]:
+    def all(self, entity_model: Type[EntityType]) -> List[EntityType]:
         """Obtain all the entities of a type from the repository.
 
         Args:
@@ -117,8 +147,8 @@ class FakeRepository(BaseModel, AbstractRepository):
         self.new_entities = {}
 
     def search(
-        self, entity_model: Type[Entity], fields: Dict[str, Union[str, int]]
-    ) -> List[Entity]:
+        self, entity_model: Type[EntityType], fields: Dict[str, Union[str, int]]
+    ) -> List[EntityType]:
         """Obtain the entities whose attributes match one or several conditions.
 
         Args:
@@ -179,4 +209,3 @@ class FakeRepository(BaseModel, AbstractRepository):
             migrations_directory: path to the directory containing the migration
                 scripts.
         """
-        # The fake repository doesn't have any schema

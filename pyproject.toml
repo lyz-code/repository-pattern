@@ -137,6 +137,10 @@ flake8-docstrings = [
 flake8-annotations = [
   "-ANN001"
 ]
+[tool.flakehell.exceptions."src/repository_pattern/model"]
+pylint = [
+  "-R0903", # Too few methods warning, but is the way to define models.
+]
 
 [tool.flakehell.exceptions."tests/migrations/"]
 pylint = [

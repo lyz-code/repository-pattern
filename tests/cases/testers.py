@@ -23,6 +23,8 @@ RepositoryTester = TypeVar(
     "PypikaRepositoryTester",
 )
 
+EntityType = TypeVar("EntityType", bound=Entity)
+
 
 class AbstractRepositoryTester(abc.ABC, Generic[Repository]):
     """Gather common methods and define the interface of the repository testers."""
@@ -38,17 +40,19 @@ class AbstractRepositoryTester(abc.ABC, Generic[Repository]):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_entity(self, database: Any, entity: Entity) -> Entity:
+    def get_entity(self, database: Any, entity: EntityType) -> EntityType:
         """Get the entity object from the data stored in the repository by it's id."""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_all(self, database: Any, entity_model: Type[Entity]) -> List[Entity]:
+    def get_all(
+        self, database: Any, entity_model: Type[EntityType]
+    ) -> List[EntityType]:
         """Get all the entities of type entity_model from the database."""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def insert_entity(self, database: Any, entity: Entity) -> None:
+    def insert_entity(self, database: Any, entity: EntityType) -> None:
         """Insert the data of an entity into the repository."""
         raise NotImplementedError
 
@@ -72,8 +76,8 @@ class FakeRepositoryTester(AbstractRepositoryTester[FakeRepository]):  # noqa: E
         assert True
 
     def get_entity(  # noqa: R0201
-        self, database: FakeRepositoryDB[Entity], entity: Entity
-    ) -> Entity:
+        self, database: FakeRepositoryDB[EntityType], entity: EntityType
+    ) -> EntityType:
         """Get the entity object from the data stored in the repository by it's id."""
         try:
             return database[type(entity)][entity.id_]
@@ -81,8 +85,8 @@ class FakeRepositoryTester(AbstractRepositoryTester[FakeRepository]):  # noqa: E
             raise EntityNotFoundError() from error
 
     def get_all(  # noqa: R0201
-        self, database: FakeRepositoryDB[Entity], entity_model: Type[Entity]
-    ) -> List[Entity]:
+        self, database: FakeRepositoryDB[EntityType], entity_model: Type[EntityType]
+    ) -> List[EntityType]:
         """Get all the entities of type entity_model from the database."""
         try:
             return [entity for entity_id, entity in database[entity_model].items()]
@@ -90,7 +94,7 @@ class FakeRepositoryTester(AbstractRepositoryTester[FakeRepository]):  # noqa: E
             raise EntityNotFoundError() from error
 
     def insert_entity(  # noqa: R0201
-        self, database: FakeRepositoryDB[Entity], entity: Entity
+        self, database: FakeRepositoryDB[EntityType], entity: EntityType
     ) -> None:
         """Insert the data of an entity into the repository."""
         try:
@@ -134,8 +138,8 @@ class PypikaRepositoryTester(AbstractRepositoryTester[PypikaRepository]):  # noq
         ) in caplog.record_tuples
 
     def build_entities(
-        self, database: str, entity_model: Type[Entity], query: Query
-    ) -> List[Entity]:
+        self, database: str, entity_model: Type[EntityType], query: Query
+    ) -> List[EntityType]:
         """Build Entity objects from the data extracted from the database.
 
         Args:
@@ -148,31 +152,32 @@ class PypikaRepositoryTester(AbstractRepositoryTester[PypikaRepository]):  # noq
         entities_data = cursor.fetchall()
         attributes = [description[0] for description in cursor.description]
 
-        entities: List[Entity] = []
+        entities: List[EntityType] = []
         for entity_data in entities_data:
             entity_dict = {
                 attributes[index]: entity_data[index]
                 for index in range(0, len(entity_data))
             }
-            entity_dict["id_"] = entity_dict.pop("id")
 
             entities.append(entity_model(**entity_dict))
         return entities
 
-    def get_entity(self, database: str, entity: Entity) -> Entity:
+    def get_entity(self, database: str, entity: EntityType) -> EntityType:
         """Get the entity object from the data stored in the repository by it's id."""
         table = Table(entity.__class__.__name__.lower())
         entities = self.build_entities(
             database,
             type(entity),
-            Query.from_(table).select("*").where(table.id == entity.id_),
+            Query.from_(table).select("*").where(table.id_ == entity.id_),
         )
         try:
             return entities[0]
         except IndexError as error:
             raise EntityNotFoundError() from error
 
-    def get_all(self, database: str, entity_model: Type[Entity]) -> List[Entity]:
+    def get_all(
+        self, database: str, entity_model: Type[EntityType]
+    ) -> List[EntityType]:
         """Get all the entities of type entity_model from the database."""
         table = Table(entity_model.__name__.lower())
         entities = self.build_entities(
@@ -182,12 +187,11 @@ class PypikaRepositoryTester(AbstractRepositoryTester[PypikaRepository]):  # noq
         )
         return entities
 
-    def insert_entity(self, database: str, entity: Entity) -> None:
+    def insert_entity(self, database: str, entity: EntityType) -> None:
         """Insert the data of an entity into the repository."""
         table = Table(entity.__class__.__name__.lower())
         cursor = next(self.build_cursor(database))
         columns = list(entity.dict().keys())
-        columns[columns.index("id_")] = "id"
         values = [value for key, value in entity.dict().items()]
         query = Query.into(table).columns(tuple(columns)).insert(tuple(values))
         cursor.execute(str(query))

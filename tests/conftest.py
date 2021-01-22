@@ -11,7 +11,15 @@ from pytest_cases import fixture, parametrize_with_cases, unpack_fixture
 
 from repository_pattern import Entity, FakeRepository, PypikaRepository, Repository
 
-from .cases import EntityCases, RepositoryCases, RepositoryTester
+from .cases import (
+    Author,
+    AuthorFactory,
+    Book,
+    BookFactory,
+    EntityCases,
+    RepositoryCases,
+    RepositoryTester,
+)
 
 # ---------------------
 # - Database fixtures -
@@ -49,14 +57,14 @@ def db_sqlite_(tmpdir: LocalPath) -> Generator[Tuple[str, sqlite3.Cursor], None,
 @pytest.fixture()
 def repo_fake() -> FakeRepository:
     """Return an instance of the FakeRepository."""
-    return FakeRepository()
+    return FakeRepository(database_url="correct_database_url")
 
 
 @pytest.fixture(name="empty_repo_pypika")
 def empty_repo_pypika_(db_sqlite: Tuple[str, sqlite3.Cursor]) -> PypikaRepository:
     """Configure an empty instance of the PypikaRepository."""
     sqlite_url = db_sqlite[0]
-    return PypikaRepository(sqlite_url)
+    return PypikaRepository(database_url=sqlite_url)
 
 
 @pytest.fixture()
@@ -140,3 +148,32 @@ def inserted_entities(
     for entity_to_insert in entities:
         repo_tester.insert_entity(database, entity_to_insert)
     return entities
+
+
+@pytest.fixture(name="book")
+def book_(repo_tester: RepositoryTester, database: Any) -> Book:  # noqa: W0621
+    """Insert a book into the repository"""
+    book = BookFactory.create()
+    repo_tester.insert_entity(database, book)
+
+    return book
+
+
+@pytest.fixture(name="books")
+def books_(repo_tester: RepositoryTester, database: Any) -> Book:  # noqa: W0621
+    """Insert multiple books into the repository"""
+    books = BookFactory.create_batch(3)
+
+    for book in books:
+        repo_tester.insert_entity(database, book)
+
+    return books
+
+
+@pytest.fixture(name="author")
+def author_(repo_tester: RepositoryTester, database: Any) -> Author:  # noqa: W0621
+    """Insert a author into the repository"""
+    author = AuthorFactory.create()
+    repo_tester.insert_entity(database, author)
+
+    return author

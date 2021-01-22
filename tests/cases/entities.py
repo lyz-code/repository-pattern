@@ -2,7 +2,16 @@
 
 import factory
 
-from .model import Author, Book, Genre
+from .model import (
+    Author,
+    Book,
+    ComposingEntity,
+    ExtendingEntity,
+    Genre,
+    MultipleComposingEntity,
+)
+
+# Basic Entities
 
 
 class EntityCases:
@@ -63,3 +72,41 @@ class GenreFactory(factory.Factory):  # type: ignore
         """Define the entity model object to use."""
 
         model = Genre
+
+
+# Relationship entitites
+
+
+class ExtendingEntityFactory(AuthorFactory):
+    """Factory to generate fake ExtendingEntity entities."""
+
+    style = factory.Faker("word")
+
+    class Meta:
+        """Define the entity model object to use."""
+
+        model = ExtendingEntity
+
+
+class ComposingEntityFactory(factory.Factory):  # type: ignore
+    """Generate objects that model single composing relationships."""
+
+    id_ = factory.Faker("pyint")
+    name = factory.Faker("sentence")
+
+    class Meta:
+        """Define the entity model object to use."""
+
+        model = ComposingEntity
+
+
+class MultipleComposingEntityFactory(factory.Factory):  # type: ignore
+    """Generate objects that model multiple composing relationships."""
+
+    id_ = factory.Faker("pyint")
+    name = factory.Faker("sentence")
+
+    class Meta:
+        """Define the entity model object to use."""
+
+        model = MultipleComposingEntity

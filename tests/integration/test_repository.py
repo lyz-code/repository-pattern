@@ -40,7 +40,7 @@ def test_repository_handles_connection_errors(repo: Repository) -> None:
     Then: a ConnectionError exception is raised
     """
     with pytest.raises(ConnectionError):
-        repo.__class__("wrong_database_url")
+        repo.__class__(database_url="wrong_database_url")
 
 
 def test_repository_can_save_an_entity(
@@ -151,8 +151,8 @@ def test_repository_raises_error_if_no_entity_found_by_get(
         repo.get(type(entity), entity.id_)
 
     assert (
-        f"There are no {entity.__class__.__name__}s with id "
-        f"{entity.id_} in the repository" in str(error.value)
+        f"There are no {entity.class_name()}s with id "
+        f"{entity.id_} in the repository." in str(error.value)
     )
 
 

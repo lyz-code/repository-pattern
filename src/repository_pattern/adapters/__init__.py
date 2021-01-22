@@ -10,31 +10,35 @@ References:
 
 import abc
 import logging
-from typing import Dict, List, Type, Union
+from typing import Dict, List, Optional, Type, Union
 
-from ..model import Entity
+from pydantic import BaseModel, validator  # pylint: disable=no-name-in-module
+
+from ..model import EntityID, EntityType, Mapper
 
 log = logging.getLogger(__name__)
 
 
-class AbstractRepository(abc.ABC):
+class AbstractRepository(BaseModel, abc.ABC):
     """Gather common methods and define the interface of the repositories.
 
     Attributes:
         database_url: URL specifying the connection to the database.
     """
 
-    @abc.abstractmethod
-    def __init__(self, database_url: str = "") -> None:
-        """Initialize the repository attributes.
+    database_url: str
+    mapper: Mapper = None  # type: ignore
 
-        Args:
-            database_url: URL specifying the connection to the database.
-        """
-        self.database_url = database_url
+    @validator("mapper", pre=True, always=True)
+    @classmethod
+    def set_mapper(cls, mapper: Optional[Mapper]) -> Mapper:
+        """Set the mapper in case it's not specified."""
+        if mapper is None:
+            return Mapper()
+        return mapper
 
     @abc.abstractmethod
-    def add(self, entity: Entity) -> None:
+    def add(self, entity: EntityType) -> None:
         """Append an entity to the repository.
 
         Args:
@@ -43,7 +47,27 @@ class AbstractRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def delete(self, entity: Entity) -> None:
+    def get(
+        self,
+        entity_model: Type[EntityType],
+        entity_id: EntityID,
+    ) -> EntityType:
+        """Obtain an entity from the repository by it's ID.
+
+        Args:
+            entity_model: Entity class to generate the object.
+            entity_id: ID of the entity object to obtain.
+
+        Returns:
+            entity: Entity object with id entity_id.
+
+        Raises:
+            EntityNotFoundError: If the entity is not found.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def delete(self, entity: EntityType) -> None:
         """Delete an entity from the repository.
 
         Args:
@@ -52,23 +76,7 @@ class AbstractRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get(self, entity_model: Type[Entity], entity_id: Union[str, int]) -> Entity:
-        """Obtain an entity from the repository by it's ID.
-
-        Args:
-            entity_model: Type of entity object to obtain.
-            entity_id: ID of the entity object to obtain.
-
-        Returns:
-            entity: Entity object that matches the search criteria.
-
-        Raises:
-            EntityNotFoundError: If the entity is not found.
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def all(self, entity_model: Type[Entity]) -> List[Entity]:
+    def all(self, entity_model: Type[EntityType]) -> List[EntityType]:
         """Obtain all the entities of a type from the repository.
 
         Args:
@@ -89,8 +97,8 @@ class AbstractRepository(abc.ABC):
 
     @abc.abstractmethod
     def search(
-        self, entity_model: Type[Entity], fields: Dict[str, Union[str, int]]
-    ) -> List[Entity]:
+        self, entity_model: Type[EntityType], fields: Dict[str, Union[str, int]]
+    ) -> List[EntityType]:
         """Obtain the entities whose attributes match one or several conditions.
 
         Args:
