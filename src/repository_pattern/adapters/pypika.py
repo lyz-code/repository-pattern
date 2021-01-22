@@ -781,7 +781,15 @@ def _upsert(
         upsert_query: SQL query in string format.
     """
     if mode == "update":
-        action = "CONFLICT(id_) DO UPDATE SET " + ", ".join(
+        # Until https://github.com/kayak/pypika/issues/535 is solved we need to write
+        # The upsert statement ourselves.
+        # nosec: B608:hardcoded_sql_expressions, Possible SQL injection vector through
+        #   string-based query construction. We're not letting the user define the
+        #   values of the query, the only variable inputs are the keys, that are
+        #   defined by the developer, so it's not probable that he chooses an
+        #   entity attributes that are an SQL injection. Once the #535 issue is
+        #   solved, we should get rid of this error too.
+        action = "CONFLICT(id_) DO UPDATE SET " + ", ".join(  # nosec
             [f"{key}=excluded.{key}" for key in columns]
         )
     else:
